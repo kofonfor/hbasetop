@@ -46,10 +46,22 @@ class HBaseStatRetriever implements Service {
         .onError({ e -> e.printStackTrace() })
         .start({ e ->
           httpClient.get(new URI("http://sverka-04:60010/table.jsp?name=invoices_v4")).then({ response ->
-            System.out.println("Status: " + response.getStatusCode()) })
-         })
-    } catch(Exception ex) {
+            System.out.println("Status: " + response.getStatusCode())
+            parseStats(response.getBody().getText())
+          })
+        })
+    } catch(Throwable ex) {
       println ex
     }
+  }
+
+  def parseStats(body) {
+    body = (body =~ /(?s)<\?xml.*$/)[0]
+    body = body.replaceAll(/<link[^>]*>/, "").replaceAll(/<meta[^>]*>/, "").replaceAll(/<input[^>]*>/, "").replaceAll(/&nbsp;/, "")
+    def rootNode = new XmlParser().parseText(body)
+    def divNode = rootNode.'**'.find { div ->
+      div.attribute("class") == "container-fluid content"
+    }
+    println "divNode: $divNode"
   }
 }
