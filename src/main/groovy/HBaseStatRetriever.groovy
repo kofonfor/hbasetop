@@ -61,7 +61,15 @@ class HBaseStatRetriever implements Service {
     def rootNode = new XmlParser().parseText(body)
     def divNode = rootNode.'**'.find { div ->
       div.attribute("class") == "container-fluid content"
+    }.children().get(1)
+    def tableNode = null
+    for(int i=0; i<divNode.children().size(); i++) {
+      println "Name: " + divNode.children().get(i).name().getLocalPart()
+      if(divNode.children().get(i).name().getLocalPart() == "h2" && divNode.children().get(i).text() == "Table Regions") {
+        tableNode = divNode.children().get(i+1)
+        break
+      }
     }
-    println "divNode: $divNode"
+    println "tableNode: $tableNode"
   }
 }
