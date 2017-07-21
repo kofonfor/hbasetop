@@ -42,9 +42,9 @@ class HBaseStatRetriever implements Service {
 
     try {
       Execution.fork()
-        .onComplete({ e -> print "Complete\n"; scheduleNext() })
-        .onError({ e -> e.printStackTrace() })
-        .start({ e ->
+        .onComplete({ scheduleNext() })
+        .onError({ it.printStackTrace() })
+        .start({
           httpClient.get(new URI("http://sverka-04:60010/table.jsp?name=invoices_v4")).then({ response ->
             System.out.println("Status: " + response.getStatusCode())
             parseStats(response.getBody().getText())
@@ -70,6 +70,12 @@ class HBaseStatRetriever implements Service {
         break
       }
     }
-    println "tableNode: $tableNode"
+    tableNode.children().each {
+      if(it.children().get(0).name().getLocalPart() == "td") {
+        println "Region name: " + it.children().get(0).text()
+        println "Locality: " + it.children().get(4).text()
+        println "Requests: " + it.children().get(5).text()
+      }
+    }
   }
 }
