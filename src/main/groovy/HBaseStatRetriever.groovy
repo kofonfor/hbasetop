@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit
 import ratpack.http.client.HttpClient
 
 class HBaseStatRetriever implements Service {
-  HttpClient httpClient
-  ScheduledExecutorService executorService
+  def httpClient
+  def executorService
   volatile ScheduledFuture<?> nextFuture
   volatile boolean stopped
 
@@ -73,6 +73,8 @@ class HBaseStatRetriever implements Service {
     tableNode.children().each {
       if(it.children().get(0).name().getLocalPart() == "td") {
         println "Region name: " + it.children().get(0).text()
+        def shortName = (it.children().get(0).text() =~ "[^,]+,[^,]*,[^\\.]*\\.(.*)\\.")[0][1]
+        println "Region short name: " + shortName
         println "Locality: " + it.children().get(4).text()
         println "Requests: " + it.children().get(5).text()
       }
