@@ -2,25 +2,30 @@ yieldUnescaped '<!DOCTYPE html>'
 html {
   head {
     meta(charset:'utf-8')
-    title("Ratpack: $title")
+    title("HBase stat visualizer")
 
-    meta(name: 'apple-mobile-web-app-title', content: 'Ratpack')
+    meta(name: 'apple-mobile-web-app-title', content: 'HBase stat visualizer')
     meta(name: 'description', content: '')
     meta(name: 'viewport', content: 'width=device-width, initial-scale=1')
 
     link(href: '/images/favicon.ico', rel: 'shortcut icon')
   }
   body {
-    header {
-      h1 'Ratpack'
-      p 'Simple, lean &amp; powerful HTTP apps'
+    table(border:1) {
+      tr {
+	th 'Name'
+        th 'Total reqs'
+        th '30-secs delta'
+        th 'Locality'
+      }
+      regions.each {
+        yieldUnescaped "<tr>"
+          td it.key
+          td it.value["requests"]
+          td it.value["delta30"]
+          td it.value["locality"]
+        yieldUnescaped "</tr>"
+      }
     }
-
-    section {
-      h2 title
-      p 'This is the main page for your Ratpack app.'
-    }
-
-    footer {}
   }
 }

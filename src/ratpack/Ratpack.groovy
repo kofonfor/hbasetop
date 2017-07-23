@@ -14,8 +14,9 @@ ratpack {
   }
 
   handlers {
-    get {
-      render groovyMarkupTemplate("index.gtpl", title: "My Ratpack App")
+    get { HBaseStatRetriever retriever ->
+      def rgns = retriever.getRegionsStat()
+      render groovyMarkupTemplate("index.gtpl", regions: rgns)
     }
 
     get("test") { HttpClient httpClient ->

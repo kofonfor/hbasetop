@@ -11,6 +11,8 @@ import ratpack.http.client.HttpClient
 class HBaseStatRetriever implements Service {
   def httpClient
   def executorService
+  def stats = [:]
+  def num = 0
   volatile ScheduledFuture<?> nextFuture
   volatile boolean stopped
 
@@ -45,7 +47,7 @@ class HBaseStatRetriever implements Service {
         .onComplete({ scheduleNext() })
         .onError({ it.printStackTrace() })
         .start({
-          httpClient.get(new URI("http://sverka-04:60010/table.jsp?name=invoices_v4")).then({ response ->
+          httpClient.get(new URI("http://sverka-04:60010/table.jsp?name=INVOICES_V5")).then({ response ->
             System.out.println("Status: " + response.getStatusCode())
             parseStats(response.getBody().getText())
           })
@@ -72,12 +74,32 @@ class HBaseStatRetriever implements Service {
     }
     tableNode.children().each {
       if(it.children().get(0).name().getLocalPart() == "td") {
-        println "Region name: " + it.children().get(0).text()
+        //println "Region name: " + it.children().get(0).text()
         def shortName = (it.children().get(0).text() =~ "[^,]+,[^,]*,[^\\.]*\\.(.*)\\.")[0][1]
-        println "Region short name: " + shortName
-        println "Locality: " + it.children().get(4).text()
-        println "Requests: " + it.children().get(5).text()
+        //println "Region short name: " + shortName
+        if(!stats[shortName]) {
+          stats[shortName] = [:]
+        }
+        if( stats[shortName].size() > 480 ) {
+          stats[shortName].remove(stats[shortName].keySet().min())
+        }
+        stats[shortName][num] = ["locality": it.children().get(4).text(), "requests": it.children().get(5).text() as int]
       }
     }
+    num = num + 1
+    println "Num: " + num
+  }
+
+  def getRegionsStat() {
+    def max = num - 1
+    def result = stats.sort {
+      it.value[max - 1]["requests"] - it.value[max]["requests"]
+    }
+    result.each {
+      it.value["requests"] = it.value[max]["requests"]
+      it.value["delta30"] = it.value[max]["requests"] - it.value[max - 1]["requests"]
+      it.value["locality"] = it.value[max]["locality"]
+    }
+    return result
   }
 }
