@@ -76,6 +76,7 @@ class HBaseStatRetriever implements Service {
       if(it.children().get(0).name().getLocalPart() == "td") {
         //println "Region name: " + it.children().get(0).text()
         def shortName = (it.children().get(0).text() =~ "[^,]+,[^,]*,[^\\.]*\\.(.*)\\.")[0][1]
+        def serverName = (it.children().get(1).text() =~ "([^:]+):")[0][1]
         //println "Region short name: " + shortName
         if(!stats[shortName]) {
           stats[shortName] = [:]
@@ -83,7 +84,7 @@ class HBaseStatRetriever implements Service {
         if( stats[shortName].size() > 480 ) {
           stats[shortName].remove(stats[shortName].keySet().min())
         }
-        stats[shortName][num] = ["locality": it.children().get(4).text(), "requests": it.children().get(5).text() as int, "server": it.children().get(1).text()]
+        stats[shortName][num] = ["locality": it.children().get(4).text(), "requests": it.children().get(5).text() as int, "server": serverName]
       }
     }
     num = num + 1
