@@ -25,7 +25,7 @@ html {
           td it.value["requests"]
           td it.value["delta30"]
           td it.value["locality"]
-          td it.value["Server"]
+          td it.value["server"]
         yieldUnescaped "</tr>"
       }
     }
