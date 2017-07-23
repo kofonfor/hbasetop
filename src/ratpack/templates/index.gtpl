@@ -17,6 +17,7 @@ html {
         th 'Total reqs'
         th '30-secs delta'
         th 'Locality'
+        th 'Server'
       }
       regions.each {
         yieldUnescaped "<tr>"
@@ -24,6 +25,7 @@ html {
           td it.value["requests"]
           td it.value["delta30"]
           td it.value["locality"]
+          td it.value["Server"]
         yieldUnescaped "</tr>"
       }
     }

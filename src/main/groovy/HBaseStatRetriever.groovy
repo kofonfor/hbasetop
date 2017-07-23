@@ -83,7 +83,7 @@ class HBaseStatRetriever implements Service {
         if( stats[shortName].size() > 480 ) {
           stats[shortName].remove(stats[shortName].keySet().min())
         }
-        stats[shortName][num] = ["locality": it.children().get(4).text(), "requests": it.children().get(5).text() as int]
+        stats[shortName][num] = ["locality": it.children().get(4).text(), "requests": it.children().get(5).text() as int, "server": it.children().get(1).text()]
       }
     }
     num = num + 1
@@ -93,12 +93,13 @@ class HBaseStatRetriever implements Service {
   def getRegionsStat() {
     def max = num - 1
     def result = stats.sort {
-      it.value[max - 1]["requests"] - it.value[max]["requests"]
+      ((it.value[max - 1] != null) && (it.value[max] != null)) ? it.value[max - 1]["requests"] - it.value[max]["requests"] : 0
     }
     result.each {
-      it.value["requests"] = it.value[max]["requests"]
-      it.value["delta30"] = it.value[max]["requests"] - it.value[max - 1]["requests"]
-      it.value["locality"] = it.value[max]["locality"]
+      it.value["requests"] = (it.value[max] != null) ? it.value[max]["requests"] : 0
+      it.value["delta30"] = ((it.value[max] != null) && (it.value[max - 1] != null)) ? it.value[max]["requests"] - it.value[max - 1]["requests"] : 0
+      it.value["locality"] = (it.value[max] != null) ? it.value[max]["locality"] : "gone"
+      it.value["server"] = (it.value[max] != null) ? it.value[max]["server"] : "gone"
     }
     return result
   }
